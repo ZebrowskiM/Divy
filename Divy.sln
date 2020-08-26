@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Divy", "Divy\Divy.csproj", "{8C20B526-F95D-4FE7-B72D-8F24E28C5D19}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C20B526-F95D-4FE7-B72D-8F24E28C5D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C20B526-F95D-4FE7-B72D-8F24E28C5D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C20B526-F95D-4FE7-B72D-8F24E28C5D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C20B526-F95D-4FE7-B72D-8F24E28C5D19}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {873405D5-99A7-47D1-80C0-AAE21252F17A}
+	EndGlobalSection
+EndGlobal
