@@ -12,5 +12,6 @@ namespace Divy.DAL
         {
             throw new NotImplementedException();
         }
+
     }
 }
