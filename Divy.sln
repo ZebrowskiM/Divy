@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divy.DAL.Sqlite", "Divy.DAL
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "implementations", "implementations", "{C90B3A5B-8464-4EDE-882E-CBAED4B0F7F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Divy.DAL.Sqlite.Tests", "Divy.DAL.Sqlite.Tests\Divy.DAL.Sqlite.Tests.csproj", "{407A003D-CD53-47A2-A815-F618512BD219}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{91D096F2-4AEE-4640-AF6F-BE98FBC16E9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91D096F2-4AEE-4640-AF6F-BE98FBC16E9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91D096F2-4AEE-4640-AF6F-BE98FBC16E9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{407A003D-CD53-47A2-A815-F618512BD219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{407A003D-CD53-47A2-A815-F618512BD219}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{407A003D-CD53-47A2-A815-F618512BD219}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{407A003D-CD53-47A2-A815-F618512BD219}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 		{F2A1068C-CDB3-4C20-91EC-B60BD07BD09D} = {C90B3A5B-8464-4EDE-882E-CBAED4B0F7F4}
 		{91D096F2-4AEE-4640-AF6F-BE98FBC16E9F} = {C90B3A5B-8464-4EDE-882E-CBAED4B0F7F4}
 		{C90B3A5B-8464-4EDE-882E-CBAED4B0F7F4} = {428E632D-5762-4533-8860-956A1956AC52}
+		{407A003D-CD53-47A2-A815-F618512BD219} = {C90B3A5B-8464-4EDE-882E-CBAED4B0F7F4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {873405D5-99A7-47D1-80C0-AAE21252F17A}
