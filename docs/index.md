@@ -1,4 +1,4 @@
-## hack your Financial Future with Divy
+## Hack your Financial Future with Divy
 One could say Divy is the result of over engineering dipped with a bit of finance and they would be absolutely right. Divy lets you track keep track of dividends, reseach stocks and potential yields of differering configurations of your portfolio. Dividends offer a perfect solution to passive income allowing you to spend more time doing things you enjoy, like browsing github!
 ## Dividends
 //TODO Add stuff about dividends here 
