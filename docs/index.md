@@ -1,9 +1,7 @@
-## Welcome to GitHub Pages
-
-You can use the [editor on GitHub](https://github.com/ZebrowskiM/Divy/edit/gh-pages/docs/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
+## hack your Financial Future with Divy
+One could say Divy is the result of over engineering dipped with a bit of finance and they would be absolutely right. Divy lets you track keep track of dividends, reseach stocks and potential yields of differering configurations of your portfolio. Dividends offer a perfect solution to passive income allowing you to spend more time doing things you enjoy, like browsing github!
+## Dividends
+//TODO Add stuff about dividends here 
 ### Markdown
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
