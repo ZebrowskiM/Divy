@@ -14,7 +14,7 @@ namespace Divy.Common
             {
                 var name = descriptor.Name;
                 var value = descriptor.GetValue(this);
-                stringBuilder.Append($" {name} = {value} ");
+                stringBuilder.Append($" {name} = {value} \t");
 
             }
             return stringBuilder.ToString();
