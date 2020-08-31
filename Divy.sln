@@ -12,9 +12,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divy.DAL.Interfaces", "Divy.DAL.Interfaces\Divy.DAL.Interfaces.csproj", "{9AC01AD1-834B-4710-BC76-A93E79672DBE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataAccesslayer", "DataAccesslayer", "{428E632D-5762-4533-8860-956A1956AC52}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.txt = Readme.txt
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divy.DAL", "Divy.DAL\Divy.DAL.csproj", "{007965D5-4270-4E3A-A1B5-32BC493D3F18}"
 EndProject
