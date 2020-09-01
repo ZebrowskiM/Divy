@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Text;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
@@ -12,6 +13,7 @@ namespace Divy.DAL.Sqlite
     {
         private readonly string _folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Divy");
         private readonly string _dbName = "DivyBase.db";
+        private readonly string _masterTable = "WatchLists";
         private readonly string _connectionString;
         public SqliteWatchListAdapter()
         {
@@ -50,12 +52,19 @@ namespace Divy.DAL.Sqlite
             throw new NotImplementedException();
         }
 
-        private bool CreateWatchlistTable(string tableName)
+        private bool UpdateAWatchListInMasterTable(int id, string Name, int NumberOfHoldings = 0)
+        {
+            //Update the row in the table with a new name and if NumberOfHoldings is not equal to zero add that too
+            var query = $"";
+            return true;
+        }
+
+        private bool CreateAWatchlistTable(string tableName)
         {
             var query = $"CREATE TABLE {tableName}(ID INT PRIMARY KEY NOT NULL," +
-                        $"TickerSymbol VARCHAR NOT NULL," +
-                        $"Name VARCHAR NOT NULL," +
-                        $"Description VARCHAR NULL," +
+                        $"TickerSymbol TEXT NOT NULL," +
+                        $"Name TEXT NOT NULL," +
+                        $"Description TEXT NULL," +
                         $"AverageCost REAL NOT NULL," +
                         $"SharePrice REAL NOT NULL," +
                         $"NumberOfShares INTEGER NOT NULL," +
@@ -67,7 +76,23 @@ namespace Divy.DAL.Sqlite
             return true;
         }
 
-        private bool DeleteWatchListTable(string tableName)
+        private int InsertIntoWatchListsTable(string tableName,int NumberOfHoldings)
+        {
+            var query = $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({tableName},{NumberOfHoldings}); ";
+            return 0;
+        }
+
+        private bool CreateTheMasterWatchListTable()
+        {
+            var query = $"CREATE TABLE {_masterTable}(" +
+                        $"ID INT PRIMARY KEY NOT NULL," +
+                        $"Name TEXT NOT NULL," +
+                        $"NumberOfHoldings INTEGER NOT NULL"  +
+                        $");";
+            return true;
+        }
+
+        private bool DeleteAWatchListTable(string tableName)
         {
             var query = $"DROP TABLE {tableName};";
 
