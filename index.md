@@ -4,7 +4,10 @@ One could say Divy is the result of over engineering dipped with a bit of financ
 Divy lets you track keep track of dividends, reseach stocks and potential yields of differering configurations of your portfolio. Dividends offer a perfect solution to passive income allowing you to spend more time doing things you enjoy, like browsing github!
 ## Dividends
 ### What are Dividends?
-//TODO Add stuff about dividends here 
+A Dividend is payment made to reward the shareholder for making an investment in the underlying company. Dividends are usually paid out in the form of a cash payment directly to the shareholder or in some cases in special agreements can be in the form of additional shares. Not all companies pay dividends typically established and mature companies will pay them.
+### Why should I care? 
+Well well how up front of you. Dividends are a great for tool for passive investment offering liquidity released overtime. The power here comes from the compound interest amplifying dividends and returns over time. 
+// Add more info about s and p 500 returns divends reinvest over 10 years, also link to reinvestment calc and investopeidea
 ### Markdown
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
