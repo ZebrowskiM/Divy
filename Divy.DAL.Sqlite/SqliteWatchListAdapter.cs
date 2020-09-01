@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
-using System.Net.Http.Headers;
-using System.Text;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
 
@@ -52,19 +49,23 @@ namespace Divy.DAL.Sqlite
             throw new NotImplementedException();
         }
 
-        private bool UpdateAWatchListInMasterTable(int id, string Name, int numberOfHoldings = 0)
+        #region SqlLiteConnection
+
+        private 
+
+        #endregion
+
+        #region CmdStringCreationMethods
+        private string UpdateAWatchListInMasterTableCmd(int id, string name, int numberOfHoldings = 0)
         {
-            var query = numberOfHoldings != 0 ?
-                $"UPDATE {_masterTable} SET Name = '{Name}', NumberOfHoldings = {numberOfHoldings} WHERE ID = {id}" :
-                $"UPDATE {_masterTable} SET Name = '{Name}' WHERE ID = {id}";
-
-
-            return true;
+            return numberOfHoldings != 0 ?
+                $"UPDATE {_masterTable} SET Name = '{name}', NumberOfHoldings = {numberOfHoldings} WHERE ID = {id}" :
+                $"UPDATE {_masterTable} SET Name = '{name}' WHERE ID = {id}";
         }
 
-        private bool CreateAWatchlistTable(string tableName)
+        private string CreateAWatchlistTableCmd(string tableName)
         {
-            var query = $"CREATE TABLE {tableName}(ID INT PRIMARY KEY NOT NULL," +
+            return $"CREATE TABLE {tableName}(ID INT PRIMARY KEY NOT NULL," +
                         $"TickerSymbol TEXT NOT NULL," +
                         $"Name TEXT NOT NULL," +
                         $"Description TEXT NULL," +
@@ -75,31 +76,26 @@ namespace Divy.DAL.Sqlite
                         $"DividendYield REAL NULL," +
                         $"MarketCap INTEGER NOT NULL" +
                         $");";
-
-            return true;
         }
 
-        private int InsertIntoWatchListsTable(string tableName,int numberOfHoldings = 0)
+        private string InsertIntoWatchListsTableCmd(string tableName,int numberOfHoldings = 0)
         {
-            var query = $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({tableName},{numberOfHoldings}); ";
-            return 0;
+            return $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({tableName},{numberOfHoldings}); ";
         }
 
-        private bool CreateTheMasterWatchListTable()
+        private string CreateTheMasterWatchListTableCmd()
         {
-            var query = $"CREATE TABLE {_masterTable}(" +
-                        $"ID INT PRIMARY KEY NOT NULL," +
-                        $"Name TEXT NOT NULL," +
-                        $"NumberOfHoldings INTEGER NOT NULL"  +
-                        $");";
-            return true;
+            return  $"CREATE TABLE {_masterTable}(" +
+                    $"ID INT PRIMARY KEY NOT NULL," +
+                    $"Name TEXT NOT NULL," +
+                    $"NumberOfHoldings INTEGER NOT NULL"  +
+                    $");";
         }
 
-        private bool DeleteAWatchListTable(string tableName)
+        private string DeleteAWatchListTableCmd(string tableName)
         {
-            var query = $"DROP TABLE {tableName};";
-
-            return true;
+            return $"DROP TABLE {tableName};";
         }
+        #endregion
     }
 }
