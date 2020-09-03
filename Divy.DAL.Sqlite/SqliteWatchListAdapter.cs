@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using Divy.Common;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
@@ -49,8 +51,6 @@ namespace Divy.DAL.Sqlite
 
         #region SqlLiteConnection
 
-        private 
-
         #endregion
 
         #region CmdStringCreationMethods
@@ -72,7 +72,10 @@ namespace Divy.DAL.Sqlite
                         $"NumberOfShares INTEGER NOT NULL," +
                         $"PriceToEarningsRatio REAL NULL," +
                         $"DividendYield REAL NULL," +
-                        $"MarketCap INTEGER NOT NULL" +
+                        $"MarketCap INTEGER NOT NULL," +
+                        $"ExpenseRatio REAL NULL,"+
+                        $"NumberOfHoldings INTEGER NULL," +
+                        $"IsFund INTEGER NOT NULL" +
                         $");";
         }
 

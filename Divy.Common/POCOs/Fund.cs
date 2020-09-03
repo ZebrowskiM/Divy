@@ -5,12 +5,11 @@ using System.Text;
 
 namespace Divy.Common.POCOs
 {
-    class Fund : Share
+    public class Fund : Share
     {
         [DataMember] public double ExpenseRatio;
 
         [DataMember] public int NumberOfHoldings;
 
-        //fund or shares
     }
 }
