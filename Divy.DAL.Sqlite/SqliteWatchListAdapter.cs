@@ -21,14 +21,10 @@ namespace Divy.DAL.Sqlite
             _connectionString = $"DataSource={path};Version=3;";
 
         }
+
         public int CreateWatchList(WatchList watchList)
         {
-            //TODO Remove the option to name the sql table
-            var tableName = "";
-            if (string.IsNullOrWhiteSpace(watchList.TableName))
-                tableName = $"_{Guid.NewGuid()}";
-            else
-                tableName = watchList.TableName;
+            var tableName = $"_{Guid.NewGuid()}";
 
             //BEGIN TRANSACTION;
             //Maybe surround the call with these or run after the table is created
@@ -53,7 +49,7 @@ namespace Divy.DAL.Sqlite
 
         #region SqlLiteConnection
 
-        //private 
+        private 
 
         #endregion
 
