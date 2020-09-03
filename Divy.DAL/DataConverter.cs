@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Divy.Common.POCOs;
 
-namespace Divy.DAL.Sqlite
+namespace Divy.DAL
 {
     /// <summary>
-    /// Taken out of production till the Other implementations are done 
+    /// Takes Lists of objects and covert them into usable Shares
     /// </summary>
-    public class SqliteDataConverter
+    public class DataConverter
     {
         public List<Share> ConvertObjectsIntoShares(List<Object> objects)
         {

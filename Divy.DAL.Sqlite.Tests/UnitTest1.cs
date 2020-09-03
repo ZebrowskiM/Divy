@@ -65,12 +65,17 @@ namespace Divy.DAL.Sqlite.Tests
             using var cmd = new SQLiteCommand(con);
             cmd.CommandText = "Select * FROM cars";
             var result = cmd.ExecuteReader();
+            while (result.Read())
+            {
+            }
             var resultList = new List<object>();
             foreach (var VARIABLE in result)
             {
                 resultList.Add(VARIABLE);
             }
-            
+            //  var name = resultList[1].D
+            Assert.IsFalse(resultList.Count == 0);
+            Assert.IsTrue(resultList.Count != 0);
 
         }
 
