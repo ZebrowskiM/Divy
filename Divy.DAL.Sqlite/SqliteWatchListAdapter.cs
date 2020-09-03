@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
+using Divy.Common;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
 
@@ -22,6 +23,7 @@ namespace Divy.DAL.Sqlite
         }
         public int CreateWatchList(WatchList watchList)
         {
+            //TODO Remove the option to name the sql table
             var tableName = "";
             if (string.IsNullOrWhiteSpace(watchList.TableName))
                 tableName = $"_{Guid.NewGuid()}";
@@ -51,7 +53,7 @@ namespace Divy.DAL.Sqlite
 
         #region SqlLiteConnection
 
-        private 
+        //private 
 
         #endregion
 

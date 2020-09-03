@@ -9,11 +9,5 @@ namespace Divy.Common.POCOs
     {
         private List<Share> _shares = new List<Share>();
 
-        public string TableName { get; }
-
-        public WatchList(string tableName)
-        {
-            TableName = tableName ?? string.Empty;
-        }
     }
 }
