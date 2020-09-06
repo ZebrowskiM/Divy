@@ -34,12 +34,47 @@ namespace Divy.DAL.Sqlite
             throw new NotImplementedException();
         }
 
-        public WatchList GetWatchListById(int watchListId)
+        public List<object> GetWatchListById(int watchListId)
         {
-            throw new NotImplementedException();
+            if(watchListId < 0) 
+                throw new ArgumentOutOfRangeException(nameof(watchListId));
+            var tableName = GetTableNameById(watchListId);
+            var objs = new List<Object>();
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+
+                using (var cmd = new SQLiteCommand(con))
+                {
+                    cmd.CommandText = SelectAllFromWatchListTable(tableName);
+                    var result = cmd.ExecuteReader();
+                    while (result.Read())
+                    {
+                        var innerObjList = new List<Object>();
+                        innerObjList.Add(result.GetString(1));//ticker
+                        innerObjList.Add(result.GetString(2));//Name
+                        innerObjList.Add(result.GetString(3));//Desc
+                        innerObjList.Add(result.GetFloat(4));//SharePrice
+                        innerObjList.Add(result.GetInt32(5));//NumberOfShares
+                        innerObjList.Add(result.GetFloat(6));//PR Ratio
+                        innerObjList.Add(result.GetFloat(7));//Div Yield
+                        innerObjList.Add(result.GetInt16(8));//Market Cap 
+                        innerObjList.Add(result.GetFloat(9));//ExpenseRatio
+                        innerObjList.Add(result.GetInt32(10));//NumOfHoldings
+                        innerObjList.Add(result.GetBoolean(11));//isFund
+                        objs.Add(innerObjList);
+                        
+                    }
+
+                }
+            }
+
+            return objs;
+
+            return null;
         }
 
-        public WatchList UpdateWatchlistById(int watchListId)
+        public List<object> UpdateWatchlistById(int watchListId)
         {
             throw new NotImplementedException();
         }
@@ -51,6 +86,29 @@ namespace Divy.DAL.Sqlite
 
         #region SqlLiteConnection
 
+        private string GetTableNameById(int id)
+        {
+            if (id < 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+            var tableName = "";
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+
+                using (var cmd = new SQLiteCommand(con))
+                {
+                    cmd.CommandText = FindTableById(id);
+                    var result = cmd.ExecuteReader();
+                    while (result.Read())
+                    {
+                        tableName = result.GetString(1);
+                    }
+
+                }
+            }
+
+            return tableName;
+        }
         #endregion
 
         #region CmdStringCreationMethods
@@ -59,6 +117,16 @@ namespace Divy.DAL.Sqlite
             return numberOfHoldings != 0 ?
                 $"UPDATE {_masterTable} SET Name = '{name}', NumberOfHoldings = {numberOfHoldings} WHERE ID = {id}" :
                 $"UPDATE {_masterTable} SET Name = '{name}' WHERE ID = {id}";
+        }
+
+        private string SelectAllFromWatchListTable(string watchListTableName)
+        {
+            return $"SELECT * FROM {watchListTableName};";
+        }
+
+        private string FindTableById(int id)
+        {
+            return $"SELECT TOP(1) FROM {_masterTable} WHERE ID = {id};";
         }
 
         private string CreateAWatchlistTableCmd(string tableName)

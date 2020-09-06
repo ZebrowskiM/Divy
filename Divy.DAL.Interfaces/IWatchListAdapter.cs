@@ -22,14 +22,14 @@ namespace Divy.DAL.Interfaces
         /// </summary>
         /// <param name="watchListId"></param>
         /// <returns>WatchList at the given Id</returns>
-        WatchList GetWatchListById(int watchListId);
+        List<Object> GetWatchListById(int watchListId);
 
         /// <summary>
         /// Update the watchList by the WatchListId
         /// </summary>
         /// <param name="watchListId"></param>
         /// <returns>WatchList with updated Values</returns>
-        WatchList UpdateWatchlistById(int watchListId);
+        List<Object> UpdateWatchlistById(int watchListId);
 
         /// <summary>
         /// Deletes the watchList by the WatchListId
