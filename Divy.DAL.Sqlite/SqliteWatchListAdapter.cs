@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Divy.Common;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
+using Serilog;
 
 namespace Divy.DAL.Sqlite
 {
@@ -26,11 +29,58 @@ namespace Divy.DAL.Sqlite
 
         public int CreateWatchList(WatchList watchList)
         {
-            var tableName = $"_{Guid.NewGuid()}";
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.BeginTransaction();
+                conn.Open();
+                using (var cmd = new SQLiteCommand(conn))
+                {
+                    var resultMasterTable = 0; 
+                    var resultWatchListTable = 0;
+                    var getTableIdByName = GetTableIdByName(watchList.Name);
+                    try
+                    {
+                        cmd.CommandText =
+                            InsertIntoWatchListsTableCmd(watchList.Name, watchList._shares.Count);
+                        resultMasterTable = cmd.ExecuteNonQuery();
+                        cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
+                        resultWatchListTable = cmd.ExecuteNonQuery();
 
-            //BEGIN TRANSACTION;
-            //Maybe surround the call with these or run after the table is created
-            //COMMIT;
+                    }
+                    catch (Exception ex)
+                    {
+                        Tracing.Error(ex);
+                        Tracing.Error("Rolling Back Table Creation and cleaning up");
+                        if (!conn.State.Equals(ConnectionState.Open))
+                            conn.Open();
+                        using (var rbCmd = new SQLiteCommand(conn))
+                        {
+                            if (resultMasterTable != 0)
+                            {
+                                rbCmd.CommandText = getTableIdByName;
+                                var idInMasterTable = rbCmd.ExecuteReader().GetInt32(0);
+                                rbCmd.CommandText = RemoveAWatchListFromMasterTable(idInMasterTable);
+                                var masterRowsAffected = rbCmd.ExecuteNonQuery();
+                                if (masterRowsAffected != 1)
+                                {
+                                    Tracing.Error("Failed to remove record from watch lists table ");
+                                }
+                            }
+                            if (resultWatchListTable != 0)
+                            {
+                                rbCmd.CommandText = DeleteAWatchListTableCmd(watchList.Name);
+                                var watchlistTableRowsAffected = rbCmd.ExecuteNonQuery();
+                                if (watchlistTableRowsAffected != 1)
+                                {
+                                    Tracing.Error("Failed to remove watch list table");
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            
             throw new NotImplementedException();
         }
 
@@ -39,7 +89,7 @@ namespace Divy.DAL.Sqlite
             if(watchListId < 0) 
                 throw new ArgumentOutOfRangeException(nameof(watchListId));
             var tableName = GetTableNameById(watchListId);
-            var objs = new List<Object>();
+            var objs = new List<object>();
             using (var con = new SQLiteConnection(_connectionString))
             {
                 con.Open();
@@ -50,18 +100,20 @@ namespace Divy.DAL.Sqlite
                     var result = cmd.ExecuteReader();
                     while (result.Read())
                     {
-                        var innerObjList = new List<Object>();
-                        innerObjList.Add(result.GetString(1));//ticker
-                        innerObjList.Add(result.GetString(2));//Name
-                        innerObjList.Add(result.GetString(3));//Desc
-                        innerObjList.Add(result.GetFloat(4));//SharePrice
-                        innerObjList.Add(result.GetInt32(5));//NumberOfShares
-                        innerObjList.Add(result.GetFloat(6));//PR Ratio
-                        innerObjList.Add(result.GetFloat(7));//Div Yield
-                        innerObjList.Add(result.GetInt16(8));//Market Cap 
-                        innerObjList.Add(result.GetFloat(9));//ExpenseRatio
-                        innerObjList.Add(result.GetInt32(10));//NumOfHoldings
-                        innerObjList.Add(result.GetBoolean(11));//isFund
+                        var innerObjList = new List<object>
+                        {
+                            result.GetString(1),//ticker
+                            result.GetString(2),//Name
+                            result.GetString(3),//Desc
+                            result.GetFloat(4),//SharePrice
+                            result.GetInt32(5),//NumberOfShares
+                            result.GetFloat(6),//PR Ratio
+                            result.GetFloat(7),//Div Yield
+                            result.GetInt16(8),//Market Cap 
+                            result.GetFloat(9),//ExpenseRatio
+                            result.GetInt32(10),//NumOfHoldings
+                            result.GetBoolean(11)//isFund
+                        };
                         objs.Add(innerObjList);
                         
                     }
@@ -70,8 +122,6 @@ namespace Divy.DAL.Sqlite
             }
 
             return objs;
-
-            return null;
         }
 
         public List<object> UpdateWatchlistById(int watchListId)
@@ -124,7 +174,12 @@ namespace Divy.DAL.Sqlite
             return $"SELECT * FROM {watchListTableName};";
         }
 
-        private string FindTableById(int id)
+        private string GetTableIdByName(string name)
+        {
+            return $"SELECT * FROM {_masterTable} WHERE Name = {name};";
+        }
+
+            private string FindTableById(int id)
         {
             return $"SELECT TOP(1) FROM {_masterTable} WHERE ID = {id};";
         }
@@ -149,21 +204,36 @@ namespace Divy.DAL.Sqlite
 
         private string InsertIntoWatchListsTableCmd(string tableName,int numberOfHoldings = 0)
         {
-            return $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({tableName},{numberOfHoldings}); ";
+            return $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({numberOfHoldings},{tableName}); ";
         }
 
         private string CreateTheMasterWatchListTableCmd()
         {
             return  $"CREATE TABLE {_masterTable}(" +
                     $"ID INT PRIMARY KEY NOT NULL," +
-                    $"Name TEXT NOT NULL," +
-                    $"NumberOfHoldings INTEGER NOT NULL"  +
+                    $"NumberOfHoldings INTEGER NOT NULL," +
+                    $"Name TEXT NOT NULL"  +
                     $");";
         }
 
         private string DeleteAWatchListTableCmd(string tableName)
         {
             return $"DROP TABLE {tableName};";
+        }
+
+        private string RemoveAWatchListFromMasterTable(int id)
+        {
+            return $"DELETE FROM {_masterTable} WHERE id = {id};";
+        }
+
+        private string PrepWatchListToBeInserted(WatchList watchList)
+        {
+            var cmd = new StringBuilder();
+            watchList._shares.ForEach(x =>
+            {
+                //flatten the data
+            });
+            return cmd.ToString();
         }
         #endregion
     }
