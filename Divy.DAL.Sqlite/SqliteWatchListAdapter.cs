@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Divy.Common;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
-using Serilog;
 
 namespace Divy.DAL.Sqlite
 {
@@ -35,16 +32,16 @@ namespace Divy.DAL.Sqlite
                 conn.Open();
                 using (var cmd = new SQLiteCommand(conn))
                 {
-                    var resultMasterTable = 0; 
-                    var resultWatchListTable = 0;
                     var getTableIdByName = GetTableIdByName(watchList.Name);
                     try
                     {
                         cmd.CommandText =
                             InsertIntoWatchListsTableCmd(watchList.Name, watchList._shares.Count);
-                        resultMasterTable = cmd.ExecuteNonQuery();
+                        var resultMasterTable = cmd.ExecuteNonQuery();
                         cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
-                        resultWatchListTable = cmd.ExecuteNonQuery();
+                        var resultWatchListTable = cmd.ExecuteNonQuery();
+                        cmd.CommandText = getTableIdByName;
+                        return cmd.ExecuteReader().GetInt32(0);
 
                     }
                     catch (Exception ex)

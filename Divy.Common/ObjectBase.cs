@@ -14,7 +14,9 @@ namespace Divy.Common
             {
                 var name = descriptor.Name;
                 var value = descriptor.GetValue(this);
-                stringBuilder.Append(value is string ? $" {name} = '{value}' \t" : $" {name} = {value} \t");
+                stringBuilder.Append(value is string || value is DateTime ?
+                    $" {name} = '{value}' \t" :
+                    $" {name} = {value} \t");
                 stringBuilder.Append(',');
             }
             if(stringBuilder.Length > 0)
@@ -40,7 +42,7 @@ namespace Divy.Common
             foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this))
             {
                 var value = descriptor.GetValue(this);
-                stringBuilder.Append(value is string ?
+                stringBuilder.Append(value is string || value is DateTime ?
                     "'"+value+"'"+ '\t' :
                     value?.ToString() + '\t');
                 stringBuilder.Append(',');
