@@ -31,7 +31,7 @@ namespace Divy.DAL.Sqlite
         {
             using (var conn = new SQLiteConnection(_connectionString))
             {
-                conn.BeginTransaction();
+               var trans =  conn.BeginTransaction();
                 conn.Open();
                 using (var cmd = new SQLiteCommand(conn))
                 {
@@ -51,33 +51,10 @@ namespace Divy.DAL.Sqlite
                     {
                         Tracing.Error(ex);
                         Tracing.Error("Rolling Back Table Creation and cleaning up");
-                        if (!conn.State.Equals(ConnectionState.Open))
-                            conn.Open();
-                        using (var rbCmd = new SQLiteCommand(conn))
-                        {
-                            if (resultMasterTable != 0)
-                            {
-                                rbCmd.CommandText = getTableIdByName;
-                                var idInMasterTable = rbCmd.ExecuteReader().GetInt32(0);
-                                rbCmd.CommandText = RemoveAWatchListFromMasterTable(idInMasterTable);
-                                var masterRowsAffected = rbCmd.ExecuteNonQuery();
-                                if (masterRowsAffected != 1)
-                                {
-                                    Tracing.Error("Failed to remove record from watch lists table ");
-                                }
-                            }
-                            if (resultWatchListTable != 0)
-                            {
-                                rbCmd.CommandText = DeleteAWatchListTableCmd(watchList.Name);
-                                var watchlistTableRowsAffected = rbCmd.ExecuteNonQuery();
-                                if (watchlistTableRowsAffected != 1)
-                                {
-                                    Tracing.Error("Failed to remove watch list table");
-                                }
-                            }
-                        }
+                        trans.Rollback();
                     }
                 }
+                trans.Commit();
 
             }
             
@@ -226,13 +203,16 @@ namespace Divy.DAL.Sqlite
             return $"DELETE FROM {_masterTable} WHERE id = {id};";
         }
 
-        private string PrepWatchListToBeInserted(WatchList watchList)
+        private string CreateInsertStringsFromShares(WatchList watchList)
         {
             var cmd = new StringBuilder();
-            cmd.Append("Insert INTO " + watchList.Name + "(");
             watchList._shares.ForEach(x =>
             {
-                //TODO add a batch insert
+                cmd.Append("Insert INTO " + watchList.Name + "(");
+                cmd.Append(x.GetPropNames());
+                cmd.Append(") VALUES (");
+                cmd.Append(x.GetPropValues());
+                cmd.Append(");");
             });
             return cmd.ToString();
         }
