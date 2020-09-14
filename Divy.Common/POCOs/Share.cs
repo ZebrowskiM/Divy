@@ -9,23 +9,23 @@ namespace Divy.Common.POCOs
     public class Share : ObjectBase
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
-        [DataMember] public string TickerSymbol;
+         public string TickerSymbol { get; set; }
 
-        [DataMember] public string Name;
+         public string Name { get; set; }
 
-        [DataMember] public string Description;
+         public string Description { get; set; }
 
-        [DataMember] public double AverageCost;
+         public double AverageCost { get; set; }
 
-        [DataMember] public double SharePrice;
+         public double SharePrice { get; set; }
 
-        [DataMember] public int NumberOfShares;
+         public int NumberOfShares { get; set; }
 
-        [DataMember] public double PriceToEarningsRatio;
+         public double PriceToEarningsRatio { get; set; }
 
-        [DataMember] public double DividendYield;
+         public double Dividend { get; set; }
 
-        [DataMember] public long MarketCap;
+         public long MarketCap { get; set; }
 
 #pragma warning disable 659
         public override bool Equals(object obj)

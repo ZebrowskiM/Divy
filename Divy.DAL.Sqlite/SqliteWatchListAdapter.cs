@@ -194,7 +194,7 @@ namespace Divy.DAL.Sqlite
                         $"SharePrice REAL NOT NULL," +
                         $"NumberOfShares INTEGER NOT NULL," +
                         $"PriceToEarningsRatio REAL NULL," +
-                        $"DividendYield REAL NULL," +
+                        $"Dividend REAL NULL," +
                         $"MarketCap INTEGER NOT NULL," +
                         $"ExpenseRatio REAL NULL,"+
                         $"NumberOfHoldings INTEGER NULL," +
@@ -229,9 +229,11 @@ namespace Divy.DAL.Sqlite
         private string PrepWatchListToBeInserted(WatchList watchList)
         {
             var cmd = new StringBuilder();
+            cmd.Append("Insert INTO " + watchList.Name + "");
             watchList._shares.ForEach(x =>
             {
                 //flatten the data
+
             });
             return cmd.ToString();
         }

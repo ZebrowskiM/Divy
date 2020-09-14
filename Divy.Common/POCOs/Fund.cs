@@ -7,9 +7,9 @@ namespace Divy.Common.POCOs
 {
     public class Fund : Share
     {
-        [DataMember] public double ExpenseRatio;
+        public double ExpenseRatio { get; set; }
 
-        [DataMember] public int NumberOfHoldings;
+        public int NumberOfHoldings { get; set; }
 
     }
 }
