@@ -40,6 +40,18 @@ namespace Divy.DAL.Sqlite
                         var resultMasterTable = cmd.ExecuteNonQuery();
                         cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
                         var resultWatchListTable = cmd.ExecuteNonQuery();
+                        var stringBuilder = new StringBuilder();
+                        watchList._shares.ForEach(x =>
+                        {
+                            stringBuilder.Append("Insert INTO " + watchList.Name + "(");
+                            stringBuilder.Append(x.GetPropNames());
+                            stringBuilder.Append(") VALUES (");
+                            stringBuilder.Append(x.GetPropValues());
+                            stringBuilder.Append(");");
+                            cmd.CommandText = stringBuilder.ToString();
+                            cmd.ExecuteNonQuery();
+                            stringBuilder.Clear();
+                        });
                         cmd.CommandText = getTableIdByName;
                         return cmd.ExecuteReader().GetInt32(0);
 
@@ -200,19 +212,6 @@ namespace Divy.DAL.Sqlite
             return $"DELETE FROM {_masterTable} WHERE id = {id};";
         }
 
-        private string CreateInsertStringsFromShares(WatchList watchList)
-        {
-            var cmd = new StringBuilder();
-            watchList._shares.ForEach(x =>
-            {
-                cmd.Append("Insert INTO " + watchList.Name + "(");
-                cmd.Append(x.GetPropNames());
-                cmd.Append(") VALUES (");
-                cmd.Append(x.GetPropValues());
-                cmd.Append(");");
-            });
-            return cmd.ToString();
-        }
         #endregion
     }
 }
