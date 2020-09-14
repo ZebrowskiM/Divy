@@ -21,5 +21,33 @@ namespace Divy.Common
                 stringBuilder.Remove(stringBuilder.Length-1, 1);
             return stringBuilder.ToString();
         }
+
+        public string GetPropNames()
+        {
+            var stringBuilder = new StringBuilder();
+            foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this))
+            {
+                stringBuilder.Append(descriptor.Name + '\t');
+                stringBuilder.Append(',');
+            }
+            if (stringBuilder.Length > 0)
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+            return stringBuilder.ToString();
+        }
+        public string GetPropValues()
+        {
+            var stringBuilder = new StringBuilder();
+            foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this))
+            {
+                var value = descriptor.GetValue(this);
+                stringBuilder.Append(value is string ?
+                    "'"+value+"'"+ '\t' :
+                    value?.ToString() + '\t');
+                stringBuilder.Append(',');
+            }
+            if (stringBuilder.Length > 0)
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+            return stringBuilder.ToString();
+        }
     }
 }

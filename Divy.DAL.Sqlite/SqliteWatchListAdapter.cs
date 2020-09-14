@@ -229,11 +229,10 @@ namespace Divy.DAL.Sqlite
         private string PrepWatchListToBeInserted(WatchList watchList)
         {
             var cmd = new StringBuilder();
-            cmd.Append("Insert INTO " + watchList.Name + "");
+            cmd.Append("Insert INTO " + watchList.Name + "(");
             watchList._shares.ForEach(x =>
             {
-                //flatten the data
-
+                //TODO add a batch insert
             });
             return cmd.ToString();
         }

@@ -62,5 +62,38 @@ namespace Divy.Tests
                                               " MarketCap = 274450000000 \t",
                 "Failed String Comparison check formatting");
         }
+
+        [Test]
+        public void GetPropNames_GivenAShare_CreatesAValidString()
+        {
+            Assert.AreEqual(_share.GetPropNames(),
+                "TickerSymbol\t,Name\t,Description\t,AverageCost\t,SharePrice\t,NumberOfShares\t,PriceToEarningsRatio\t,Dividend\t,MarketCap\t",
+                "Failed string compare, check formatting");
+        }
+
+        [Test]
+        public void GetPropValues_GivenAShare_CreatesAValidString()
+        {
+            Assert.AreEqual(_share.GetPropValues(),
+                "'MSFT'\t,'Microsoft Corporation'\t,'They magic boxes that do very fast math'\t,100.55\t,200\t,500\t,35.42\t,2.04\t,2400000000000\t",
+                "Failed string compare, check formatting");
+
+        }
+
+        [Test]
+        public void GetPropNames_GivenAFund_CreatesAValidString()
+        {
+            Assert.AreEqual(_fund.GetPropNames(),
+                "ExpenseRatio\t,NumberOfHoldings\t,TickerSymbol\t,Name\t,Description\t,AverageCost\t,SharePrice\t,NumberOfShares\t,PriceToEarningsRatio\t,Dividend\t,MarketCap\t"
+                ,"Failed string compare, check formatting");
+        }
+
+        [Test]
+        public void GetPropValues_GivenAFund_CreatesAValidString()
+        {
+            Assert.AreEqual(_fund.GetPropValues(),
+                "0.09\t,500\t,'SPY'\t,'SPDR S&P 500 ETF Trust'\t,'Companies that might make a profit sometimes'\t,5.75\t,350\t,50000\t,28.72\t,5.73\t,274450000000\t",
+                "Failed string compare, check formatting");
+        }
     }
 }
