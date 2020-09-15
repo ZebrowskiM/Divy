@@ -21,37 +21,60 @@ namespace Divy.DAL.Sqlite.Tests
                 SQLiteConnection.CreateFile(path);
             using var con = new SQLiteConnection($"DataSource={path};Version=3;");
             con.Open();
-
+            var tran = con.BeginTransaction();
+            
             using var cmd = new SQLiteCommand(con);
             cmd.CommandText = @"CREATE TABLE cars(id INTEGER PRIMARY KEY,
                     name TEXT, price INT)";
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Audi',52642)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "BEGIN TRANSACTION;" +
+            //                  "INSERT INTO cars(name, price) VALUES('Volkswagen',21600);" + //never works
+            //                  "INSERT INTO cars(name, price) VALUES('Mercedes',57127);" +
+            //                  "INSERT INTO cars(name, price) VALUES('Skoda',9000);" +
+            //                  "INSERT INTO cars(name, price) VALUES('Hummer',41400);" +
+            //                  "COMMIT;";
+            cmd.CommandText = "INSERT INTO cars(name, price) VALUES" +
+                              "('Volkswagen',21600)," +
+                              "('Mercedes',57127)," +
+                              "('Skoda',9000)," +
+                              "('Hummer',41400);";
+                              cmd.ExecuteNonQuery();
+            tran.Rollback();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Mercedes',57127)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Mercedes',57127)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Skoda',9000)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Skoda',9000)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Volvo',29000)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Volvo',29000)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Bentley',350000)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Bentley',350000)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Citroen',21000)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Citroen',21000)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Hummer',41400)";
+            //cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Hummer',41400)";
-            cmd.ExecuteNonQuery();
-
-            cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Volkswagen',21600)";
-            cmd.ExecuteNonQuery();
+            //cmd.CommandText = "INSERT INTO cars(name, price) VALUES('Volkswagen',21600)";
+            //cmd.ExecuteNonQuery();
 
 
+        }
+
+        [TestMethod]
+        public void drop()
+        {
+            var path = Path.Combine(folderPath, dbName);
+            using var con = new SQLiteConnection($"DataSource={path};Version=3;");
+            con.Open();
+
+            using var cmd = new SQLiteCommand(con);
+            cmd.CommandText = "DROP TABLE cars";
+            var result = cmd.ExecuteNonQuery();
         }
 
         [TestMethod]
@@ -65,13 +88,15 @@ namespace Divy.DAL.Sqlite.Tests
             using var cmd = new SQLiteCommand(con);
             cmd.CommandText = "Select * FROM cars";
             var result = cmd.ExecuteReader();
+            var resultList = new List<object>();
             while (result.Read())
             {
-            }
-            var resultList = new List<object>();
-            foreach (var VARIABLE in result)
-            {
-                resultList.Add(VARIABLE);
+            
+               
+                foreach (var VARIABLE in result)
+                {
+                    resultList.Add(VARIABLE);
+                }
             }
             //  var name = resultList[1].D
             Assert.IsFalse(resultList.Count == 0);

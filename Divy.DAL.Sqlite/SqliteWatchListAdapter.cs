@@ -26,9 +26,11 @@ namespace Divy.DAL.Sqlite
 
         public int CreateWatchList(WatchList watchList)
         {
+            var id = -1;
             using (var conn = new SQLiteConnection(_connectionString))
             {
                var trans =  conn.BeginTransaction();
+              
                 conn.Open();
                 using (var cmd = new SQLiteCommand(conn))
                 {
@@ -53,7 +55,7 @@ namespace Divy.DAL.Sqlite
                             stringBuilder.Clear();
                         });
                         cmd.CommandText = getTableIdByName;
-                        return cmd.ExecuteReader().GetInt32(0);
+                        id =  cmd.ExecuteReader().GetInt32(0);
 
                     }
                     catch (Exception ex)
@@ -64,10 +66,8 @@ namespace Divy.DAL.Sqlite
                     }
                 }
                 trans.Commit();
-
             }
-            
-            throw new NotImplementedException();
+            return id;
         }
 
         public List<object> GetWatchListById(int watchListId)
@@ -112,11 +112,16 @@ namespace Divy.DAL.Sqlite
 
         public List<object> UpdateWatchlistById(int watchListId)
         {
+            //Id maybe over ride the equals 
+            // then compare each share in the watch list and just update the one that is differnet
+            // or pass in a share and have it changed
+            // or pass on a whole watch list and then find the shares to update 
             throw new NotImplementedException();
         }
 
         public void DeleteWatchListById(int watchListId)
         {
+            //Delete record from master table and then drop the table in a transaction 
             throw new NotImplementedException();
         }
 
@@ -126,7 +131,7 @@ namespace Divy.DAL.Sqlite
         {
             if (id < 0)
                 throw new ArgumentOutOfRangeException(nameof(id));
-            var tableName = "";
+            var tableName = string.Empty;
             using (var con = new SQLiteConnection(_connectionString))
             {
                 con.Open();
