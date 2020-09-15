@@ -110,12 +110,23 @@ namespace Divy.DAL.Sqlite
             return objs;
         }
 
-        public List<object> UpdateWatchlistById(int watchListId)
+        public List<object> UpdateWatchlistById(int watchListId,WatchList watchList)
         {
-            //Id maybe over ride the equals 
-            // then compare each share in the watch list and just update the one that is differnet
-            // or pass in a share and have it changed
-            // or pass on a whole watch list and then find the shares to update 
+            if (watchListId < 0)
+                throw new ArgumentException($"{watchListId} cannot be less than 0, cannot update watch List");
+            if(watchList == null)
+                throw new ArgumentNullException(nameof(watchList),"Watch List cannot be null, cannot update watch List");
+            if (GetWatchListById(watchListId) == null)
+            {
+                var createdListId =  CreateWatchList(watchList);
+                return GetWatchListById(createdListId);
+            }
+
+
+            //Check which rows exist and then check their values if they are different update them
+
+            // Add any new rows 
+
             throw new NotImplementedException();
         }
 
