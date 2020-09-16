@@ -123,10 +123,12 @@ namespace Divy.DAL.Sqlite
                 return GetWatchListById(createdListId);
             }
 
-            var sharesToBeUpdated = new List<Share>();
-            var sharesToBeAdded = new List<Share>();
+            var sharesToBeUpdated = watchList.Shares.FindAll(x => GetShareId(x, watchList.Name) != null);
+            var sharesToBeAdded = watchList.Shares.FindAll(x => !sharesToBeUpdated.Contains(x));
+            
             foreach (var entity in watchList.Shares)
             {
+                //GetShareId(entity)
                 //Maybe do this in one trans for speed
                 // loop through the shares to find which ones exist which ones dont, create two List<Share>
                 // 1 that need to be updated 
@@ -262,9 +264,7 @@ namespace Divy.DAL.Sqlite
             return outShare;
         }
         #endregion
-
         #region CmdStringCreationMethods
-
         private string SelectShareByTicker(string tableName, string ticker,string name)
         {
             return $"SELECT * FROM {tableName} WHERE TickerSymbol = {ticker} AND Name = {name};";
