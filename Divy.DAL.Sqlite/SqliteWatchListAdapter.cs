@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SQLite;
 using System.IO;
 using System.Text;
@@ -38,12 +39,12 @@ namespace Divy.DAL.Sqlite
                     try
                     {
                         cmd.CommandText =
-                            InsertIntoWatchListsTableCmd(watchList.Name, watchList._shares.Count);
+                            InsertIntoWatchListsTableCmd(watchList.Name, watchList.Shares.Count);
                         var resultMasterTable = cmd.ExecuteNonQuery();
                         cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
                         var resultWatchListTable = cmd.ExecuteNonQuery();
                         var stringBuilder = new StringBuilder();
-                        watchList._shares.ForEach(x =>
+                        watchList.Shares.ForEach(x =>
                         {
                             stringBuilder.Append("Insert INTO " + watchList.Name + "(");
                             stringBuilder.Append(x.GetPropNames());
@@ -63,6 +64,7 @@ namespace Divy.DAL.Sqlite
                         Tracing.Error(ex);
                         Tracing.Error("Rolling Back Table Creation and cleaning up");
                         trans.Rollback();
+                        throw;
                     }
                 }
                 trans.Commit();
@@ -95,10 +97,9 @@ namespace Divy.DAL.Sqlite
                             result.GetInt32(5),//NumberOfShares
                             result.GetFloat(6),//PR Ratio
                             result.GetFloat(7),//Div Yield
-                            result.GetInt16(8),//Market Cap 
+                            result.GetInt64(8),//Market Cap 
                             result.GetFloat(9),//ExpenseRatio
                             result.GetInt32(10),//NumOfHoldings
-                            result.GetBoolean(11)//isFund
                         };
                         objs.Add(innerObjList);
                         
@@ -122,6 +123,36 @@ namespace Divy.DAL.Sqlite
                 return GetWatchListById(createdListId);
             }
 
+            var sharesToBeUpdated = new List<Share>();
+            var sharesToBeAdded = new List<Share>();
+            foreach (var entity in watchList.Shares)
+            {
+                //Maybe do this in one trans for speed
+                // loop through the shares to find which ones exist which ones dont, create two List<Share>
+                // 1 that need to be updated 
+                // 2 that need to be added
+            }
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+                var trans = con.BeginTransaction();
+                try
+                {
+                    using (var cmd = new SQLiteCommand(con))
+                    {
+                        cmd.CommandText = ""; //SelectAllFromWatchListTable(tableName);
+                        var result = cmd.ExecuteReader();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Tracing.Error(ex);
+                    Tracing.Error("Failed to update table, rolling back any and all changes made.");
+                    trans.Rollback();
+                    throw;
+                }
+            }
+          
 
             //Check which rows exist and then check their values if they are different update them
 
@@ -161,9 +192,83 @@ namespace Divy.DAL.Sqlite
 
             return tableName;
         }
+
+        /// <summary>
+        /// Pulls back a share 
+        /// </summary>
+        /// <param name="share"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        private Share GetShareId(Share share,string tableName)
+        {
+            if (share == null) throw new ArgumentNullException(nameof(share),"Cannot Get a null Share");
+            if(string.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName), "TableName is required to query back the ShareId");
+            Share outShare = null;
+                using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+                var trans = con.BeginTransaction();
+                try
+                {
+                    using (var cmd = new SQLiteCommand(con))
+                    {
+                        cmd.CommandText = SelectShareByTicker(tableName,share.TickerSymbol,share.Name);
+                        var result = cmd.ExecuteReader();
+                        while (result.Read())
+                        {
+                            try
+                            {
+                                outShare = new Share();
+                                try
+                                {
+                                    if (result.GetFloat(7) != null || result.GetInt32(10) != null)
+                                    {
+                                        outShare = new Fund
+                                        {
+                                            ExpenseRatio = result.GetFloat(9),
+                                            NumberOfHoldings = result.GetInt32(10)
+                                        };
+                                    }
+                                }
+                                catch
+                                {
+                                } // Let empty to catch if Exp ratio and Num of Holdings Columns are null
+
+                                outShare.TickerSymbol = result.GetString(1);
+                                outShare.Name = result.GetString(2);
+                                outShare.Description = result.GetString(3);
+                                outShare.SharePrice = result.GetFloat(4);
+                                outShare.NumberOfShares = result.GetInt32(5);
+                                outShare.PriceToEarningsRatio = result.GetFloat(6);
+                                outShare.Dividend = result.GetFloat(7);
+                                outShare.MarketCap = result.GetInt64(8);
+                            }
+                            catch (Exception ex)
+                            {
+                                Tracing.Warning($"Potential Data Issue with {share?.Name} : ticker {share?.TickerSymbol}, See ex for more details ",ex);
+                            } // left empty on purpose, Data Issues Ignore and return null
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Tracing.Error(ex);
+                    Tracing.Error("Failed to update table, rolling back any and all changes made.");
+                    trans.Rollback();
+                    throw;
+                }
+            }
+
+            return outShare;
+        }
         #endregion
 
         #region CmdStringCreationMethods
+
+        private string SelectShareByTicker(string tableName, string ticker,string name)
+        {
+            return $"SELECT * FROM {tableName} WHERE TickerSymbol = {ticker} AND Name = {name};";
+        }
         private string UpdateAWatchListInMasterTableCmd(int id, string name, int numberOfHoldings = 0)
         {
             return numberOfHoldings != 0 ?
@@ -181,9 +286,9 @@ namespace Divy.DAL.Sqlite
             return $"SELECT * FROM {_masterTable} WHERE Name = {name};";
         }
 
-            private string FindTableById(int id)
+        private string FindTableById(int id)
         {
-            return $"SELECT TOP(1) FROM {_masterTable} WHERE ID = {id};";
+            return $"SELECT * FROM {_masterTable} WHERE ID = {id} LIMIT 1 ;";
         }
 
         private string CreateAWatchlistTableCmd(string tableName)
@@ -199,8 +304,7 @@ namespace Divy.DAL.Sqlite
                         $"Dividend REAL NULL," +
                         $"MarketCap INTEGER NOT NULL," +
                         $"ExpenseRatio REAL NULL,"+
-                        $"NumberOfHoldings INTEGER NULL," +
-                        $"IsFund INTEGER NOT NULL" +
+                        $"NumberOfHoldings INTEGER NULL" +
                         $");";
         }
 
