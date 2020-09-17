@@ -122,18 +122,8 @@ namespace Divy.DAL.Sqlite
                 var createdListId =  CreateWatchList(watchList);
                 return GetWatchListById(createdListId);
             }
-
             var sharesToBeUpdated = watchList.Shares.FindAll(x => GetShareId(x, watchList.Name) != null);
             var sharesToBeAdded = watchList.Shares.FindAll(x => !sharesToBeUpdated.Contains(x));
-            
-            foreach (var entity in watchList.Shares)
-            {
-                //GetShareId(entity)
-                //Maybe do this in one trans for speed
-                // loop through the shares to find which ones exist which ones dont, create two List<Share>
-                // 1 that need to be updated 
-                // 2 that need to be added
-            }
             using (var con = new SQLiteConnection(_connectionString))
             {
                 con.Open();
@@ -165,8 +155,33 @@ namespace Divy.DAL.Sqlite
 
         public void DeleteWatchListById(int watchListId)
         {
-            //Delete record from master table and then drop the table in a transaction 
-            throw new NotImplementedException();
+            if(watchListId < 0)
+                throw new Exception("WatchList Id cannot be negative");
+            var watchListTableName = GetTableNameById(watchListId);
+            if (string.IsNullOrWhiteSpace(watchListTableName))
+                throw new  Exception($"Could not Find watchList Name for watchlist with Id {watchListId}");
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+                var trans = con.BeginTransaction();
+                try
+                {
+                    using (var cmd = new SQLiteCommand(con))
+                    {
+                        cmd.CommandText = DeleteAWatchListTableCmd(watchListTableName);
+                        var dropTable = cmd.ExecuteNonQuery();
+                        cmd.CommandText = RemoveAWatchListFromMasterTable(watchListId);
+                        var removeFromMaster = cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Tracing.Error(ex);
+                    Tracing.Error("Failed to Delete WatchList, rolling back any and all changes made.");
+                    trans.Rollback();
+                    throw;
+                }
+            }
         }
 
         #region SqlLiteConnection
