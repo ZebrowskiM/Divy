@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Text;
@@ -185,7 +186,11 @@ namespace Divy.DAL.Sqlite
         }
 
         #region SqlLiteConnection
-
+        /// <summary>
+        /// Get the Name of the watch list table using the id of the watchList
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private string GetTableNameById(int id)
         {
             if (id < 0)
@@ -209,7 +214,52 @@ namespace Divy.DAL.Sqlite
 
             return tableName;
         }
+        /// <summary>
+        /// Inserts the given watch list table
+        /// </summary>
+        /// <param name="share"></param>
+        /// <param name="watchListName"></param>
+        private void InsertShareIntoWatchList(Share share,string watchListName)
+        {
+            if(share == null)
+                throw new ArgumentNullException(nameof(share),"Cannot Insert a Null Share");
+            if (string.IsNullOrWhiteSpace(watchListName))
+                throw new ArgumentNullException(nameof(watchListName), "Cannot Insert a Share, watchListName is null");
+            var props = string.IsNullOrWhiteSpace(share.GetPropNames()) 
+                ? throw new Exception("Error reading Share properties, check logs") 
+                : share.GetPropNames();
+            var values = string.IsNullOrWhiteSpace(share.GetPropValues())
+                ? throw new Exception("Share Cannot be empty, check logs")
+                : share.GetPropValues(); 
 
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append("Insert INTO " + watchListName + "(");
+            stringBuilder.Append(props);
+            stringBuilder.Append(") VALUES (");
+            stringBuilder.Append(values);
+            stringBuilder.Append(");");
+
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+                var trans = con.BeginTransaction();
+                try
+                {
+                    using (var cmd = new SQLiteCommand(con))
+                    {
+                        cmd.CommandText = stringBuilder.ToString();
+                        var result = cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Tracing.Error(ex);
+                    Tracing.Error("Failed to insert share into watchList, rolling back any and all changes made.");
+                    trans.Rollback();
+                    throw;
+                }
+            }
+        }
         /// <summary>
         /// Pulls back a share 
         /// </summary>
