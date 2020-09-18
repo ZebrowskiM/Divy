@@ -23,7 +23,6 @@ namespace Divy.DAL.Sqlite
             if(!File.Exists(path))
                 SQLiteConnection.CreateFile(path);
             _connectionString = $"DataSource={path};Version=3;";
-
         }
 
         public int CreateWatchList(WatchList watchList)
@@ -44,19 +43,8 @@ namespace Divy.DAL.Sqlite
                         var resultMasterTable = cmd.ExecuteNonQuery();
                         cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
                         var resultWatchListTable = cmd.ExecuteNonQuery();
-                        var stringBuilder = new StringBuilder();
-                        watchList.Shares.ForEach(x =>
-                        {
-                            stringBuilder.Append("Insert INTO " + watchList.Name + "(");
-                            stringBuilder.Append(x.GetPropNames());
-                            stringBuilder.Append(") VALUES (");
-                            stringBuilder.Append(x.GetPropValues());
-                            stringBuilder.Append(");");
-                            cmd.CommandText = stringBuilder.ToString();
-                            cmd.ExecuteNonQuery();
-                            stringBuilder.Clear();
-                        });
-                        cmd.CommandText = getTableIdByName;
+                        watchList.Shares.ForEach(x => InsertShareIntoWatchList(x, watchList.Name));
+                            cmd.CommandText = getTableIdByName;
                         id =  cmd.ExecuteReader().GetInt32(0);
 
                     }
@@ -125,6 +113,8 @@ namespace Divy.DAL.Sqlite
             }
             var sharesToBeUpdated = watchList.Shares.FindAll(x => GetShareId(x, watchList.Name) != null);
             var sharesToBeAdded = watchList.Shares.FindAll(x => !sharesToBeUpdated.Contains(x));
+            sharesToBeAdded.ForEach(x => InsertShareIntoWatchList(x,watchList.Name));
+            var stringBuilder = new StringBuilder();
             using (var con = new SQLiteConnection(_connectionString))
             {
                 con.Open();
@@ -133,8 +123,15 @@ namespace Divy.DAL.Sqlite
                 {
                     using (var cmd = new SQLiteCommand(con))
                     {
-                        cmd.CommandText = ""; //SelectAllFromWatchListTable(tableName);
-                        var result = cmd.ExecuteReader();
+                        sharesToBeUpdated.ForEach(x =>
+                        {
+                            stringBuilder.Append("UPDATE " + watchList.Name + " Set ");
+                            stringBuilder.Append(x);
+                            stringBuilder.Append(" Where id = " + GetShareId(x, watchList.Name) + ";");
+                            cmd.CommandText = stringBuilder.ToString();
+                            var result = cmd.ExecuteNonQuery();
+                        });
+                     
                     }
                 }
                 catch (Exception ex)
@@ -145,13 +142,8 @@ namespace Divy.DAL.Sqlite
                     throw;
                 }
             }
-          
 
-            //Check which rows exist and then check their values if they are different update them
-
-            // Add any new rows 
-
-            throw new NotImplementedException();
+            return GetWatchListById(watchListId);
         }
 
         public void DeleteWatchListById(int watchListId)
