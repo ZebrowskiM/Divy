@@ -27,6 +27,8 @@ namespace Divy.DAL.Sqlite
 
         public int CreateWatchList(WatchList watchList)
         {
+            if (watchList == null)
+                throw new ArgumentNullException(nameof(watchList), "Watch List cannot be null, cannot Create watch List");
             var id = -1;
             using (var conn = new SQLiteConnection(_connectionString))
             {
