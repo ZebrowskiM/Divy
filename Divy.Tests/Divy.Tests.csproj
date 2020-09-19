@@ -14,7 +14,10 @@
 
   <ItemGroup>
     <Folder Include="IntegrationTests\" />
-    <Folder Include="UnitTests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Divy.Common\Divy.Common.csproj" />
   </ItemGroup>
 
 </Project>

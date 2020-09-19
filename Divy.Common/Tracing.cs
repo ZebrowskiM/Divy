@@ -76,7 +76,7 @@ namespace Divy.Common
         private static void CreateLogPath()
         {
             var FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                "Divy");
+                "Divy","Logs");
             if (!System.IO.Directory.Exists(FilePath))
             {
                 System.IO.Directory.CreateDirectory(FilePath);

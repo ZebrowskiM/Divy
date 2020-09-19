@@ -22,14 +22,15 @@ namespace Divy.DAL.Interfaces
         /// </summary>
         /// <param name="watchListId"></param>
         /// <returns>WatchList at the given Id</returns>
-        WatchList GetWatchListById(int watchListId);
+        List<Object> GetWatchListById(int watchListId);
 
         /// <summary>
-        /// Update the watchList by the WatchListId
+        /// Updates a given watch List at the given Id and returns it. If the tables does not exist, it will be created and returned. 
         /// </summary>
         /// <param name="watchListId"></param>
-        /// <returns>WatchList with updated Values</returns>
-        WatchList UpdateWatchlistById(int watchListId);
+        /// <param name="watchList"></param>
+        /// <returns></returns>
+        List<object> UpdateWatchlistById(int watchListId, WatchList watchList);
 
         /// <summary>
         /// Deletes the watchList by the WatchListId

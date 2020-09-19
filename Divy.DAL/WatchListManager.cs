@@ -6,11 +6,23 @@ using Divy.Common.POCOs;
 
 namespace Divy.DAL
 {
-    class WatchListManager : IWatchListManager
+    public class WatchListManager : IWatchListManager
     {
+        private readonly IWatchListAdapter _watchListAdapter;
+        public WatchListManager(IWatchListAdapter adapter)
+        {
+            _watchListAdapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+        }
+
         public List<WatchList> GetAllWatchLists()
         {
             throw new NotImplementedException();
+        }
+
+        public WatchList GetWatchListById(int id)
+        {
+           var rawObjects =  _watchListAdapter.GetWatchListById(id);
+            return null;
         }
 
     }

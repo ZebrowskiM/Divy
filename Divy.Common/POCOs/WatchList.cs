@@ -7,11 +7,10 @@ namespace Divy.Common.POCOs
 {
     public class WatchList : ObjectBase
     {
-        private List<Share> _shares = new List<Share>();
 
-        public WatchList()
-        {
-            
-        }
+        public List<Share> Shares { get; set; }
+
+        public string Name { get; set; }
+
     }
 }
