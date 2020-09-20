@@ -13,14 +13,19 @@ namespace Divy.DAL.Sqlite
 {
     public class SqliteWatchListAdapter : IWatchListAdapter
     {
-        private readonly string _folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Divy");
+        private readonly string _folderPath;
         private readonly string _dbName = "DivyBase.db";
         private readonly string _masterTable = "WatchLists";
         private readonly string _connectionString;
-        public SqliteWatchListAdapter()
+        public SqliteWatchListAdapter(string filePath)
         {
+            _folderPath =  !Directory.Exists(filePath)
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Divy")
+                : filePath;
+            if (!Directory.Exists(_folderPath))
+                Directory.CreateDirectory(_folderPath);
             var path = Path.Combine(_folderPath, _dbName);
-            if(!File.Exists(path))
+            if (!File.Exists(path))
                 SQLiteConnection.CreateFile(path);
             _connectionString = $"DataSource={path};Version=3;";
         }

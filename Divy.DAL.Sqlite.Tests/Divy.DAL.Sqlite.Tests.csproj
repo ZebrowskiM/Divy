@@ -14,4 +14,8 @@
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Divy.DAL.Sqlite\Divy.DAL.Sqlite.csproj" />
+  </ItemGroup>
+
 </Project>
