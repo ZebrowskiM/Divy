@@ -156,7 +156,7 @@ namespace Divy.DAL.Sqlite
         public void DeleteWatchListById(int watchListId)
         {
             if(watchListId < 0)
-                throw new Exception("WatchList Id cannot be negative");
+                throw new ArgumentException("WatchList Id cannot be negative");
             var watchListTableName = GetTableNameById(watchListId);
             if (string.IsNullOrWhiteSpace(watchListTableName))
                 throw new  Exception($"Could not Find watchList Name for watchlist with Id {watchListId}");
