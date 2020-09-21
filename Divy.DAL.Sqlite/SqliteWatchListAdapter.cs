@@ -35,24 +35,20 @@ namespace Divy.DAL.Sqlite
             if (watchList == null)
                 throw new ArgumentNullException(nameof(watchList), "Watch List cannot be null, cannot Create watch List");
             var id = -1;
+            InitMasterTable();
             using (var conn = new SQLiteConnection(_connectionString))
             {
-               var trans =  conn.BeginTransaction();
-              
                 conn.Open();
+                var trans =  conn.BeginTransaction();
                 using (var cmd = new SQLiteCommand(conn))
                 {
-                    var getTableIdByName = GetTableIdByName(watchList.Name);
                     try
                     {
-                        cmd.CommandText =
-                            InsertIntoWatchListsTableCmd(watchList.Name, watchList.Shares.Count);
+                        cmd.CommandText = InsertIntoWatchListsTableCmd(watchList.Name, watchList.Shares.Count);
                         var resultMasterTable = cmd.ExecuteNonQuery();
                         cmd.CommandText = CreateAWatchlistTableCmd(watchList.Name);
                         var resultWatchListTable = cmd.ExecuteNonQuery();
-                        watchList.Shares.ForEach(x => InsertShareIntoWatchList(x, watchList.Name));
-                            cmd.CommandText = getTableIdByName;
-                        id =  cmd.ExecuteReader().GetInt32(0);
+                        trans.Commit();
 
                     }
                     catch (Exception ex)
@@ -63,8 +59,31 @@ namespace Divy.DAL.Sqlite
                         throw;
                     }
                 }
-                trans.Commit();
+                var getTableIdByName = GetTableIdByName(watchList.Name);
+                using (var getIdCmd = new SQLiteCommand(conn))
+                {
+                    try
+                    {
+                        trans = conn.BeginTransaction();
+                        getIdCmd.CommandText = getTableIdByName;
+                        var reader = getIdCmd.ExecuteReader();
+                        while (reader.Read())
+                            id = reader.GetInt32(0);
+                        trans.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        Tracing.Error(ex);
+                        Tracing.Error("Failed to get Tables ID, rolling back trans");
+                        trans.Rollback();
+                        throw;
+                    }
+
+                }
+                watchList.Shares.ForEach(x => InsertShareIntoWatchList(x, watchList.Name));
+                conn.Dispose();
             }
+
             return id;
         }
 
@@ -186,6 +205,39 @@ namespace Divy.DAL.Sqlite
 
         #region SqlLiteConnection
         /// <summary>
+        /// Will check if the master table exists, if it does not it will create it
+        /// </summary>
+        private void InitMasterTable()
+        {
+            using (var con = new SQLiteConnection(_connectionString))
+            {
+                con.Open();
+                var trans = con.BeginTransaction();
+                try
+                {
+                    using (var cmd = new SQLiteCommand(con))
+                    {
+                        cmd.CommandText = CreateTheMasterWatchListTableCmd();
+                        var x = cmd.ExecuteNonQuery();
+                    }
+
+                    trans.Commit();
+                }
+                catch (Exception ex)
+                {
+                    Tracing.Error(ex);
+                    Tracing.Error("Failed to create watchLists Table, rolling back any and all changes made.");
+                    trans.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
+            }
+        }
+
+        /// <summary>
         /// Get the Name of the watch list table using the id of the watchList
         /// </summary>
         /// <param name="id"></param>
@@ -248,6 +300,7 @@ namespace Divy.DAL.Sqlite
                     {
                         cmd.CommandText = stringBuilder.ToString();
                         var result = cmd.ExecuteNonQuery();
+                        trans.Commit();
                     }
                 }
                 catch (Exception ex)
@@ -257,6 +310,7 @@ namespace Divy.DAL.Sqlite
                     trans.Rollback();
                     throw;
                 }
+                con.Close();
             }
         }
         /// <summary>
@@ -331,7 +385,7 @@ namespace Divy.DAL.Sqlite
         #region CmdStringCreationMethods
         private string SelectShareByTicker(string tableName, string ticker,string name)
         {
-            return $"SELECT * FROM {tableName} WHERE TickerSymbol = {ticker} AND Name = {name};";
+            return $"SELECT * FROM {tableName} WHERE TickerSymbol = '{ticker}' AND Name = '{name}';";
         }
         private string UpdateAWatchListInMasterTableCmd(int id, string name, int numberOfHoldings = 0)
         {
@@ -347,7 +401,7 @@ namespace Divy.DAL.Sqlite
 
         private string GetTableIdByName(string name)
         {
-            return $"SELECT * FROM {_masterTable} WHERE Name = {name};";
+            return $"SELECT * FROM {_masterTable} WHERE Name = '{name}';";
         }
 
         private string FindTableById(int id)
@@ -357,7 +411,7 @@ namespace Divy.DAL.Sqlite
 
         private string CreateAWatchlistTableCmd(string tableName)
         {
-            return $"CREATE TABLE {tableName}(ID INT PRIMARY KEY NOT NULL," +
+            return $"CREATE TABLE IF NOT EXISTS {tableName} (ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                         $"TickerSymbol TEXT NOT NULL," +
                         $"Name TEXT NOT NULL," +
                         $"Description TEXT NULL," +
@@ -374,13 +428,13 @@ namespace Divy.DAL.Sqlite
 
         private string InsertIntoWatchListsTableCmd(string tableName,int numberOfHoldings = 0)
         {
-            return $"INSERT INTO {_masterTable}( Name,NumberOfHoldings) VALUES({numberOfHoldings},{tableName}); ";
+            return $"INSERT INTO {_masterTable}( NumberOfHoldings,Name) VALUES({numberOfHoldings},'{tableName}'); ";
         }
 
         private string CreateTheMasterWatchListTableCmd()
         {
-            return  $"CREATE TABLE {_masterTable}(" +
-                    $"ID INT PRIMARY KEY NOT NULL," +
+            return  $"CREATE TABLE IF NOT EXISTS {_masterTable}(" +
+                    $"ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     $"NumberOfHoldings INTEGER NOT NULL," +
                     $"Name TEXT NOT NULL"  +
                     $");";
