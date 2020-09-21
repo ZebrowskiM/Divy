@@ -36,7 +36,7 @@ namespace Divy.DAL.Sqlite.Tests
                 }
                 catch //SqlLite does some internal functions, this waits for them to finish so clean up works
                 {
-                    System.Threading.Thread.Sleep(2500);
+                    System.Threading.Thread.Sleep(2000);
                     Directory.Delete(testPath, true);
                 }
             }
