@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using Divy.Common.POCOs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RestSharp;
 
 namespace Divy.DAL.Sqlite.Tests
 {
@@ -21,8 +22,8 @@ namespace Divy.DAL.Sqlite.Tests
 
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        [ClassCleanup]
+        public static  void Cleanup()
         {
           
 
@@ -36,7 +37,7 @@ namespace Divy.DAL.Sqlite.Tests
                 }
                 catch //SqlLite does some internal functions, this waits for them to finish so clean up works
                 {
-                    System.Threading.Thread.Sleep(2000);
+                    System.Threading.Thread.Sleep(10000);
                     Directory.Delete(testPath, true);
                 }
             }
@@ -85,7 +86,7 @@ namespace Divy.DAL.Sqlite.Tests
 
             adapter.CreateWatchList(null);
         }
-
+        [TestCategory("IntegrationTests")]
         [TestMethod]
         public void CreateWatchList_ValidWatchList_SuccessfullyCreatesWatchList()
         {
@@ -94,6 +95,17 @@ namespace Divy.DAL.Sqlite.Tests
 
             var watchListId = adapter.CreateWatchList(watchList);
             Assert.AreEqual(watchListId,1);
+
+        }
+        [TestCategory("IntegrationTests")]
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void CreateWatchList_InValidShare_ThrowsException()
+        {
+            var adapter = new SqliteWatchListAdapter(null);
+            var watchList = getInvalidWatchList();
+
+            var watchListId = adapter.CreateWatchList(watchList);
 
         }
         #endregion
@@ -163,7 +175,8 @@ namespace Divy.DAL.Sqlite.Tests
                         TickerSymbol = "MSFT",
                         NumberOfShares = 5,
                         PriceToEarningsRatio = 5.0,
-                        SharePrice = 200
+                        SharePrice = 200,
+
                     },
                     new Fund
                     {
@@ -180,6 +193,26 @@ namespace Divy.DAL.Sqlite.Tests
                         TickerSymbol = "SPHD"
                     }
                 }
+            };
+        }
+
+        private WatchList getInvalidWatchList()
+        {
+            return new WatchList
+            {
+                Name = "NonValidWatchList",
+                Shares = new List<Share>
+                {
+                    new Share
+                    {
+                        AverageCost = 5
+                    },
+                    new Fund
+                    {
+                        ExpenseRatio = 2
+                    }
+                }
+
             };
         }
 

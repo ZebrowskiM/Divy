@@ -274,6 +274,10 @@ namespace Divy.DAL.Sqlite
         {
             if(share == null)
                 throw new ArgumentNullException(nameof(share),"Cannot Insert a Null Share");
+            if(share.GetType() == typeof(Fund)? !Validations.IsFundValid(share as Fund): !Validations.IsShareValid(share))
+            {
+                throw new Exception("Share is invalid, cannot add");
+            } 
             if (string.IsNullOrWhiteSpace(watchListName))
                 throw new ArgumentNullException(nameof(watchListName), "Cannot Insert a Share, watchListName is null");
             var props = string.IsNullOrWhiteSpace(share.GetPropNames()) 
@@ -281,7 +285,7 @@ namespace Divy.DAL.Sqlite
                 : share.GetPropNames();
             var values = string.IsNullOrWhiteSpace(share.GetPropValues())
                 ? throw new Exception("Share Cannot be empty, check logs")
-                : share.GetPropValues(); 
+                : share.GetPropValues();
 
             var stringBuilder = new StringBuilder();
             stringBuilder.Append("Insert INTO " + watchListName + "(");
