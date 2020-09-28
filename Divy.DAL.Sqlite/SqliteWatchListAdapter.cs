@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Text;
+using System.Transactions;
 using Divy.Common;
 using Divy.Common.POCOs;
 using Divy.DAL.Interfaces;
@@ -93,6 +94,7 @@ namespace Divy.DAL.Sqlite
                 throw new ArgumentOutOfRangeException(nameof(watchListId));
             var tableName = GetTableNameById(watchListId);
             var objs = new List<object>();
+            objs.Add(tableName);
             using (var con = new SQLiteConnection(_connectionString))
             {
                 con.Open();
@@ -103,18 +105,39 @@ namespace Divy.DAL.Sqlite
                     var result = cmd.ExecuteReader();
                     while (result.Read())
                     {
+                        float expenseRatio;
+                        try
+                        {
+                            expenseRatio = result.GetFloat(10);
+                        }
+                        catch(InvalidCastException ex)
+                        {
+                            expenseRatio = -1;
+                        }
+
+                        int numOfHoldings;
+                        try
+                        {
+                            numOfHoldings = result.GetInt32(11);
+                        }
+                        catch(InvalidCastException ex)
+                        {
+                            numOfHoldings = -1;
+                        }
+                        
                         var innerObjList = new List<object>
                         {
                             result.GetString(1),//ticker
                             result.GetString(2),//Name
                             result.GetString(3),//Desc
-                            result.GetFloat(4),//SharePrice
-                            result.GetInt32(5),//NumberOfShares
-                            result.GetFloat(6),//PR Ratio
-                            result.GetFloat(7),//Div Yield
-                            result.GetInt64(8),//Market Cap 
-                            result.GetFloat(9),//ExpenseRatio
-                            result.GetInt32(10),//NumOfHoldings
+                            result.GetFloat(4),//AverageCost
+                            result.GetFloat(5),//SharePrice
+                            result.GetInt32(6),//NumberOfShares
+                            result.GetFloat(7),//PR Ratio
+                            result.GetFloat(8),//Div Yield
+                            result.GetInt64(9),//Market Cap 
+                            expenseRatio,//ExpenseRatio
+                            numOfHoldings,//NumOfHoldings
                         };
                         objs.Add(innerObjList);
                         
@@ -257,7 +280,7 @@ namespace Divy.DAL.Sqlite
                     var result = cmd.ExecuteReader();
                     while (result.Read())
                     {
-                        tableName = result.GetString(1);
+                        tableName = result.GetString(2);
                     }
 
                 }

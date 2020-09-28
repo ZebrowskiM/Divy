@@ -121,6 +121,20 @@ namespace Divy.DAL.Sqlite.Tests
 
             adapter.GetWatchListById(id);
         }
+
+        [TestMethod]
+        public void GetWatchListById_watchListExistsAndIdIsValid_ReturnsValidWatchList()
+        {
+            var adapter = new SqliteWatchListAdapter(null);
+            var watchList = getValidWatchList();
+            var watchListId = adapter.CreateWatchList(watchList);
+            var watchlist = adapter.GetWatchListById(1);
+
+            Assert.AreEqual(watchlist[0], watchList.Name);
+            List<object> objs = (List<object>)watchlist[1];
+            //TODO put in private method the tests to confirm the data was read correctly
+            //Assert.AreEqual(objs[1]);
+        }
         #endregion
 
         #region UpdateWatchListbyId
